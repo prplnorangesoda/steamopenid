@@ -4,7 +4,7 @@
  * Note: this crate does not add a login redirect endpoint *to* Steam's server (yet, possibly), but simply
  * checks against parameters to see if they are valid.
  *
- * The source is maintained on https://github.com/prplnorangesoda/steamopenid.
+ * The source is maintained on <https://github.com/prplnorangesoda/steamopenid>.
  *
  * This crate depends on Reqwest (for now) but I'll probably rewrite it to work with cURL.
  */
