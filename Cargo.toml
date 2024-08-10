@@ -1,0 +1,11 @@
+[package]
+name = "steamopenid"
+description = "A library for easily interacting with Steam's OpenID support."
+version = "0.1.0"
+authors = ["Lucy Faria (prplnorangesoda) <rafploooz@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+derive_more = {version = "1.0.0", features = ["display", "from", "error"]}
+reqwest = "0.12.5"
+urlencoding = "2.1.3"
