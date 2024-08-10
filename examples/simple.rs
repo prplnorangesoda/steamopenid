@@ -1,3 +1,7 @@
+/*!
+ *  This example creates an HTTP Server according to the Rust Book and
+ *  uses the crate to generate useful values from the Steam API.
+*/
 use std::{
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
@@ -13,6 +17,7 @@ async fn main() {
     println!(
         "Visit http://{ADDRESS}:{PORT}/ in your browser and sign in through Steam, then check the console OR web return."
     );
+    println!("This example requires an Internet connection.");
 
     for stream in server.incoming() {
         let stream = stream.unwrap();
@@ -29,8 +34,6 @@ async fn handle_connection(mut stream: TcpStream) {
         .map(|result| result.unwrap())
         .take_while(|line| !line.is_empty())
         .collect();
-
-    println!("{http_req:#?}");
 
     let response;
     let get_req = http_req.get(0).unwrap();
