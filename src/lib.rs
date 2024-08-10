@@ -1,5 +1,12 @@
 /*!
- * This is a library intended for use with Steam's old, outdated OpenID 2.0 implementation.
+ * This is a crate intended for use with Steam's old, outdated OpenID 2.0 implementation.
+ *
+ * Note: this crate does not add a login redirect endpoint *to* Steam's server (yet, possibly), but simply
+ * checks against parameters to see if they are valid.
+ *
+ * The source is maintained on https://github.com/prplnorangesoda/steamopenid.
+ *
+ * This crate depends on Reqwest (for now) but I'll probably rewrite it to work with cURL.
  */
 
 use derive_more::{Display, Error, From};
@@ -9,25 +16,30 @@ use std::collections::HashMap;
 #[derive(Debug, Display, From, Error)]
 pub enum ApiError {
     ReqwestError(reqwest::Error),
-    KeyValuesError(openid_kv::DecodeError),
+    KeyValuesError(kv::DecodeError),
     Handling,
 }
 
 ///
-/// Send a full OpenID 2.0 spec check_authentication __direct request__ to the Steam servers, using provided parameters;
-/// presumably provided via a redirect.
+/// Send a full OpenID 2.0 spec check_authentication __direct request__ to the Steam servers, using a provided HashMap
+/// of openid params.
 ///
-/// ## Examples
+/// The easiest way to create a valid HashMap is to get input from an OpenID Indirect Response
+/// (shown in the simple.rs example included with this crate) and run it through `kv::decode_keyvalues`.
 pub async fn verify_auth_keyvalues(
     key_values_map: &HashMap<String, String>,
 ) -> Result<bool, ApiError> {
-    let body_string = openid_kv::encode_keyvalues(key_values_map);
+    let body_string = kv::encode_keyvalues(key_values_map);
     let body_string = body_string.replace("openid.mode=id_res", "openid.mode=check_authentication");
 
     send_verify_request_raw(body_string).await
 }
 
-async fn send_verify_request_raw(body: String) -> Result<bool, ApiError> {
+///
+/// Send a full POST request to the steam servers,
+/// using the provided body.
+///
+pub async fn send_verify_request_raw(body: String) -> Result<bool, ApiError> {
     let client = reqwest::Client::builder()
         .redirect(Policy::none())
         .build()?;
@@ -49,7 +61,10 @@ async fn send_verify_request_raw(body: String) -> Result<bool, ApiError> {
     Ok(text.contains("is_valid:true"))
 }
 
-pub mod openid_kv {
+pub mod kv {
+    /*!
+     * Functions to work with OpenID Key-value pairs.
+     */
     use derive_more::derive::{Display, Error};
     use std::collections::{HashMap, VecDeque};
     use urlencoding::{decode, encode};
