@@ -6,7 +6,7 @@
  *
  * The source is maintained on <https://github.com/prplnorangesoda/steamopenid>.
  *
- * This crate depends on Reqwest (for now) but I'll probably rewrite it to work with cURL.
+ * This crate depends on cURL.
  */
 
 use curl::easy;
