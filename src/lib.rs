@@ -9,13 +9,13 @@
  * This crate depends on Reqwest (for now) but I'll probably rewrite it to work with cURL.
  */
 
+use curl::easy;
+use curl::easy::List;
 use derive_more::{Display, Error, From};
-use reqwest::redirect::Policy;
 use std::collections::HashMap;
 
 #[derive(Debug, Display, From, Error)]
 pub enum ApiError {
-    ReqwestError(reqwest::Error),
     KeyValuesError(kv::DecodeError),
     Handling,
 }
@@ -35,30 +35,52 @@ pub async fn verify_auth_keyvalues(
     send_verify_request_raw(body_string).await
 }
 
+struct Collector(Vec<u8>);
+
+impl easy::Handler for Collector {
+    fn write(&mut self, data: &[u8]) -> Result<usize, easy::WriteError> {
+        self.0.extend_from_slice(data);
+        Ok(data.len())
+    }
+}
 ///
 /// Send a full POST request to the steam servers,
 /// using the provided body.
 ///
 pub async fn send_verify_request_raw(body: String) -> Result<bool, ApiError> {
-    let client = reqwest::Client::builder()
-        .redirect(Policy::none())
-        .build()?;
+    // let client = reqwest::Client::builder()
+    //     .redirect(Policy::none())
+    //     .build()?;
+    let mut client = easy::Easy2::new(Collector(Vec::new()));
+    client.post(true).unwrap();
+    client.post_fields_copy(&body.as_bytes()).unwrap();
+    client
+        .url("https://steamcommunity.com/openid/login")
+        .expect("should be able to set URL");
 
+    client
+        .perform()
+        .expect("Should end up with a result from steam");
+
+    let status = client.response_code().unwrap();
+    // fucked up one liner: extracts the utf8 bytes within the Vec<> inside the Collector
+    let resp = String::from_utf8_lossy(&(client.get_ref()).0);
     println!("{body}");
-    let resp = client
-        .post("https://steamcommunity.com/openid/login")
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(body)
-        .send()
-        .await?;
+    // let resp = client
+    //     .post("https://steamcommunity.com/openid/login")
+    //     .header("Content-Type", "application/x-www-form-urlencoded")
+    //     .body(body)
+    //     .send()
+    //     .await?;
 
-    if resp.status() != reqwest::StatusCode::OK {
+    if status != 200
+    /* OK */
+    {
         println!("{resp:?}");
         return Err(ApiError::Handling);
     };
 
-    let text = resp.text().await?;
-    Ok(text.contains("is_valid:true"))
+    Ok(resp.contains("is_valid:true"))
 }
 
 pub mod kv {
