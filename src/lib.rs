@@ -10,7 +10,6 @@
  */
 
 use curl::easy;
-use curl::easy::List;
 use derive_more::{Display, Error, From};
 use std::collections::HashMap;
 
