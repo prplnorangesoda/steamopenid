@@ -1,7 +1,7 @@
 [package]
 name = "steamopenid"
 description = "A library for easily interacting with Steam's OpenID support."
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Lucy Faria (prplnorangesoda) <rafploooz@gmail.com>"]
 repository = "https://github.com/prplnorangesoda/steamopenid"
 license = "MIT"
