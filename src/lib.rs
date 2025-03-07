@@ -93,7 +93,7 @@ async fn send_verify_request_raw(body: String) -> Result<bool, ApiError> {
     let status = client.response_code().unwrap();
     // fucked up one liner: extracts the utf8 bytes within the Vec<> inside the Collector
     let resp = String::from_utf8_lossy(&(client.get_ref()).0);
-    println!("{body}");
+    log::debug!("{body}");
     // let resp = client
     //     .post("https://steamcommunity.com/openid/login")
     //     .header("Content-Type", "application/x-www-form-urlencoded")
@@ -104,7 +104,7 @@ async fn send_verify_request_raw(body: String) -> Result<bool, ApiError> {
     if status != 200
     /* OK */
     {
-        println!("{status}");
+        log::debug!("{status}");
         return Err(ApiError::Handling);
     };
 
