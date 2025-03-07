@@ -10,6 +10,7 @@ edition = "2021"
 [dependencies]
 curl = "0.4.46"
 derive_more = { version = "1.0.0", features = ["display", "from", "error"] }
+log = "0.4.26"
 urlencoding = "2.1.3"
 
 [dev-dependencies]
